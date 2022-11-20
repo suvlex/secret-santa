@@ -28,8 +28,14 @@ class MemberAdmin(admin.ModelAdmin):
 @admin.register(SecretSanta)
 class SecretSantaAdmin(admin.ModelAdmin):
     model = SecretSanta
-    list_display = ['santa', 'recipient', 'celebration']
+    list_display = ['santa', 'hashed_recipient_info', 'celebration']
     fields = ['santa', 'recipient', 'celebration']
+
+    def hashed_recipient_info(self, obj):
+        return obj.recipient.hashed_member_info
+
+    hashed_recipient_info.verbose = 'xxx'
+    hashed_recipient_info.short_description = 'Hashed recipient info'
 
 
 def create_secret_santa(modeladmin, request, queryset):
