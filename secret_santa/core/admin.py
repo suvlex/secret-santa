@@ -36,7 +36,7 @@ resend_email.short_description = "Receive a follow-up letter with the recipient 
 class SecretSantaAdmin(admin.ModelAdmin):
     model = SecretSanta
     list_display = ['santa', 'hashed_recipient_info', 'celebration']
-    fields = ['santa', 'recipient', 'celebration']
+    fields = ['santa', 'celebration']
 
     def hashed_recipient_info(self, obj):
         return obj.recipient.hashed_email
@@ -45,6 +45,12 @@ class SecretSantaAdmin(admin.ModelAdmin):
     hashed_recipient_info.short_description = 'Hashed recipient info'
 
     actions = [resend_email]
+
+    def has_change_permission(self, request, obj=None):
+        return False
+
+    def has_add_permission(self, request):
+        return False
 
 
 def create_secret_santa(modeladmin, request, queryset):
