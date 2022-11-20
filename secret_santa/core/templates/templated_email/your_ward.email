@@ -1,0 +1,4 @@
+{% block subject %} Привіт! Це таємний санта від Regulus Team{% endblock %}
+{% block html %}
+  <h3>Тебе обрано бути таємним сантою для {{ recipient_name }}</h3>
+{% endblock %}

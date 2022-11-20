@@ -7,6 +7,7 @@ from django.db import models
 from django.utils import timezone
 from model_utils import FieldTracker
 from random import choice
+from templated_email import send_templated_mail
 
 
 class User(AbstractUser):
@@ -65,9 +66,25 @@ class Member(models.Model):
         return hashlib.md5((hash_data + settings.HASH_SALT).encode('utf-8')).hexdigest()
 
     @property
-    def email(self):
+    def email(self) -> str:
         user = self.user
         return user.email if user else self.email_address
+
+    @property
+    def full_name(self) -> str:
+        user = self.user
+        return user.name if user else self.name
+
+def mailing(santa, recipient_name) -> None:
+    try:
+        send_templated_mail(
+            template_name='your_ward.email',
+            recipient_list=[santa.email],
+            from_email=settings.TEMPLATED_EMAIL_FROM_EMAIL,
+            context=dict(recipient_name=recipient_name)
+        )
+    except Exception:
+        pass
 
 
 class Celebration(models.Model):
@@ -102,6 +119,7 @@ class Celebration(models.Model):
     def run(self):
         self.clear()
 
+        dict_for_mailing = dict()
         list_for_create_secret_santa = list()
 
         colleagues_dict = dict()
@@ -117,6 +135,7 @@ class Celebration(models.Model):
         while colleagues_count_dict:
             member = list(colleagues_count_dict.keys())[0]
             colleague = choice(colleagues_dict[member])
+            dict_for_mailing[member] = colleague.full_name
             list_for_create_secret_santa.append(SecretSanta(santa=member, recipient=colleague, celebration=self))
 
             colleagues_dict.pop(member)
@@ -127,6 +146,9 @@ class Celebration(models.Model):
             colleagues_count_dict = self.get_colleagues_count_dict(colleagues_dict)
 
         SecretSanta.objects.bulk_create(list_for_create_secret_santa)
+
+        for key, value in dict_for_mailing.items():
+            mailing(key, value)
 
     def clear(self):
         self.secret_santas.all().delete()
@@ -141,3 +163,6 @@ class SecretSanta(models.Model):
 
     class Meta:
         unique_together = ["santa", "recipient", "celebration"]
+
+    def resend_email(self) -> None:
+        mailing(self.santa, self.recipient.name)
