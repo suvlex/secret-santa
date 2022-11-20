@@ -42,15 +42,15 @@ class Member(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField('Name', max_length=255, null=True, blank=True)
-    email_address = models.EmailField("Email address", null = True, blank = True)
+    email_address = models.EmailField("Email address")
     email_address_tracker = FieldTracker(fields=['email_address'])
-    hashed_member_info = models.CharField("Hashed recipient's email", max_length=32, null=True, blank=True)
+    hashed_email = models.CharField("Hashed recipient's email", max_length=32, null=True, blank=True)
 
     colleagues = models.ManyToManyField("self", blank=True)
 
     def save(self, *kwargs) -> None:
         if self.pk is None or (self.email_address_tracker.changed() and self.user is None):
-            self.hashed_member_info = self.get_hashed_member_info()
+            self.hashed_email = self.get_hashed_email()
 
         if self.name or self.user:
             super().save(*kwargs)
@@ -60,10 +60,8 @@ class Member(models.Model):
     def __str__(self) -> str:
         return self.name or self.user.name
 
-    def get_hashed_member_info(self):
-        email = self.email
-        hash_data = email if email else self.name
-        return hashlib.md5((hash_data + settings.HASH_SALT).encode('utf-8')).hexdigest()
+    def get_hashed_email(self):
+        return hashlib.md5((self.email + settings.HASH_SALT).encode('utf-8')).hexdigest()
 
     @property
     def email(self) -> str:

@@ -39,7 +39,7 @@ class SecretSantaAdmin(admin.ModelAdmin):
     fields = ['santa', 'recipient', 'celebration']
 
     def hashed_recipient_info(self, obj):
-        return obj.recipient.hashed_member_info
+        return obj.recipient.hashed_email
 
     hashed_recipient_info.verbose = 'xxx'
     hashed_recipient_info.short_description = 'Hashed recipient info'
