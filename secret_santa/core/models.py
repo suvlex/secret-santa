@@ -53,6 +53,9 @@ class Celebration(models.Model):
     team = models.ForeignKey(Team, verbose_name="The team celebrating the new year", on_delete=models.CASCADE)
     year = models.PositiveSmallIntegerField(verbose_name="Next year")
 
+    def __str__(self) -> str:
+        return f'{self.team} in {self.year}'
+
     class Meta:
         unique_together = ["team", "year"]
         ordering = ["year"]
@@ -93,7 +96,7 @@ class Celebration(models.Model):
         while colleagues_count_dict:
             member = list(colleagues_count_dict.keys())[0]
             colleague = choice(colleagues_dict[member])
-            list_for_create_secret_santa.append(SecretSanta(santa=member, recipient=colleague))
+            list_for_create_secret_santa.append(SecretSanta(santa=member, recipient=colleague, celebration=self))
 
             colleagues_dict.pop(member)
             for key, value in colleagues_dict.items():
@@ -105,7 +108,7 @@ class Celebration(models.Model):
         SecretSanta.objects.bulk_create(list_for_create_secret_santa)
 
     def clear(self):
-        SecretSanta.objects.filter(santa__in=self.team.members.all()).delete()
+        self.secret_santas.all().delete()
 
 
 class SecretSanta(models.Model):
@@ -113,3 +116,7 @@ class SecretSanta(models.Model):
     recipient = models.OneToOneField(
         Member, verbose_name="Recipient of a gift from Santa", related_name='my_santa', on_delete=models.CASCADE
     )
+    celebration = models.ForeignKey(Celebration, related_name='secret_santas', on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ["santa", "recipient", "celebration"]

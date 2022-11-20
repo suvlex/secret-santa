@@ -28,8 +28,8 @@ class MemberAdmin(admin.ModelAdmin):
 @admin.register(SecretSanta)
 class SecretSantaAdmin(admin.ModelAdmin):
     model = SecretSanta
-    list_display = ['santa', 'recipient']
-    fields = ['santa', 'recipient']
+    list_display = ['santa', 'recipient', 'celebration']
+    fields = ['santa', 'recipient', 'celebration']
 
 
 def create_secret_santa(modeladmin, request, queryset):
