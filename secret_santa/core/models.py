@@ -114,39 +114,48 @@ class Celebration(models.Model):
 
         return dict(sorted(colleagues_count_dict.items(), key=lambda item: item[1]))
 
+    def check_and_run(self):
+        flag = True
+        while flag:
+            try:
+                dict_for_mailing = dict()
+                list_for_create_secret_santa = list()
+
+                colleagues_dict = dict()
+                for member in self.team.members.prefetch_related("colleagues"):
+                    for colleague in member.colleagues.all():
+                        if member in colleagues_dict:
+                            colleagues_dict[member].append(colleague)
+                        else:
+                            colleagues_dict[member] = [colleague]
+
+                colleagues_count_dict = self.get_colleagues_count_dict(colleagues_dict)
+
+                while colleagues_count_dict:
+                    member = list(colleagues_count_dict.keys())[0]
+                    colleague = choice(colleagues_dict[member])
+                    dict_for_mailing[member] = colleague.full_name
+                    list_for_create_secret_santa.append(SecretSanta(santa=member, recipient=colleague, celebration=self))
+
+                    colleagues_dict.pop(member)
+                    for key, value in colleagues_dict.items():
+                        if colleague in value:
+                            value.remove(colleague)
+                            colleagues_dict[key] = value
+                    colleagues_count_dict = self.get_colleagues_count_dict(colleagues_dict)
+
+                SecretSanta.objects.bulk_create(list_for_create_secret_santa)
+
+                for key, value in dict_for_mailing.items():
+                    mailing(key, value)
+
+                flag = False
+            except Exception:
+                pass
+
     def run(self):
         self.clear()
-
-        dict_for_mailing = dict()
-        list_for_create_secret_santa = list()
-
-        colleagues_dict = dict()
-        for member in self.team.members.prefetch_related("colleagues"):
-            for colleague in member.colleagues.all():
-                if member in colleagues_dict:
-                    colleagues_dict[member].append(colleague)
-                else:
-                    colleagues_dict[member] = [colleague]
-
-        colleagues_count_dict = self.get_colleagues_count_dict(colleagues_dict)
-
-        while colleagues_count_dict:
-            member = list(colleagues_count_dict.keys())[0]
-            colleague = choice(colleagues_dict[member])
-            dict_for_mailing[member] = colleague.full_name
-            list_for_create_secret_santa.append(SecretSanta(santa=member, recipient=colleague, celebration=self))
-
-            colleagues_dict.pop(member)
-            for key, value in colleagues_dict.items():
-                if colleague in value:
-                    value.remove(colleague)
-                    colleagues_dict[key] = value
-            colleagues_count_dict = self.get_colleagues_count_dict(colleagues_dict)
-
-        SecretSanta.objects.bulk_create(list_for_create_secret_santa)
-
-        for key, value in dict_for_mailing.items():
-            mailing(key, value)
+        self.check_and_run()
 
     def clear(self):
         self.secret_santas.all().delete()
@@ -158,6 +167,9 @@ class SecretSanta(models.Model):
         Member, verbose_name="Recipient of a gift from Santa", related_name='my_santa', on_delete=models.CASCADE
     )
     celebration = models.ForeignKey(Celebration, related_name='secret_santas', on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f'{self.santa} {self.recipient} {self.celebration}'
 
     class Meta:
         unique_together = ["santa", "recipient", "celebration"]

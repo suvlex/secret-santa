@@ -133,25 +133,3 @@ AUTH_USER_MODEL = 'core.User'
 
 HASH_SALT = 'Best wishes by Alex'
 
-if env.str('MAILGUN_API_KEY', '') and env.str('MAILGUN_SENDER_DOMAIN'):
-    THIRD_PARTY_APPS += ["anymail"]  # noqa F405
-    EMAIL_BACKEND = 'anymail.backends.mailgun.EmailBackend'
-    ANYMAIL = {
-        'MAILGUN_API_KEY': env.str('MAILGUN_API_KEY'),
-        'MAILGUN_SENDER_DOMAIN': env.str('MAILGUN_SENDER_DOMAIN'),
-    }
-    if env.str('MAILGUN_API_URL', ''):
-        ANYMAIL['MAILGUN_API_URL'] = env.str('MAILGUN_API_URL')
-else:
-    EMAIL_CONFIG = env.email_url('DJANGO_EMAIL_CONFIG', default='consolemail://')
-    vars().update(EMAIL_CONFIG)
-
-# https://docs.djangoproject.com/en/dev/ref/settings/#default-from-email
-DEFAULT_FROM_EMAIL = env(
-    "DJANGO_DEFAULT_FROM_EMAIL", default="Regulus Team <support@regulus.team>"
-)
-
-# django-templated-email
-# ------------------------------------------------------------------------------
-TEMPLATED_EMAIL_BACKEND = 'templated_email.backends.vanilla_django.TemplateBackend'
-TEMPLATED_EMAIL_FROM_EMAIL = DEFAULT_FROM_EMAIL
