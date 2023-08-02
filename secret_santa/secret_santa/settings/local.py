@@ -35,6 +35,8 @@ EMAIL_USE_TLS = False
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-backend
 EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
+TEMPLATED_EMAIL_FROM_EMAIL = "Alex Suvertok <alex.suvertol@gmail.team>"
+
 # https://django-debug-toolbar.readthedocs.io/en/latest/installation.html#internal-ips
 INTERNAL_IPS = ["127.0.0.1", "10.0.2.2"]
 

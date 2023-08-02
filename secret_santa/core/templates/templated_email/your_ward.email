@@ -1,4 +1,4 @@
-{% block subject %} Привіт! Це таємний санта від Regulus Team{% endblock %}
+{% block subject %} Hello! This is Secret Santa by Alex Suvertok{% endblock %}
 {% block html %}
-  <h3>Тебе обрано бути таємним сантою для {{ recipient_name }}</h3>
+  <h3>You have been chosen to be a secret santa for {{ recipient_name }}</h3>
 {% endblock %}

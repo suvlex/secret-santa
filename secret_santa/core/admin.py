@@ -36,7 +36,7 @@ resend_email.short_description = "Receive a follow-up letter with the recipient 
 class SecretSantaAdmin(admin.ModelAdmin):
     model = SecretSanta
     list_display = ['santa', 'hashed_recipient_info', 'celebration']
-    fields = ['santa', 'celebration']
+    fields = ['santa', 'recipient', 'celebration']
 
     def hashed_recipient_info(self, obj):
         return obj.recipient.hashed_email

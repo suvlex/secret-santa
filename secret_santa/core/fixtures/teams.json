@@ -1,1 +1,9 @@
-[{"model": "core.team", "pk": 1, "fields": {"name": "RT"}}]
+[
+{
+    "model": "core.team",
+    "pk": 1,
+    "fields": {
+        "name": "Test Team"
+    }
+}
+]
