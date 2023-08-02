@@ -17,7 +17,7 @@ pip install -r requirements.txt
 ./manage.py runserver
 ```
 
-#### Setting basic data (RT team and its members)
+#### Setting basic data
 ```
 sh utility/loaddata_all_fixtures.sh
 ```
